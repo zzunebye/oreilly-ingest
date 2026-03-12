@@ -60,6 +60,19 @@ class DownloaderHandler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def do_DELETE(self):
+        if self.path == "/api/cookies":
+            self._handle_reset_cookies()
+        else:
+            self._send_json({"error": "Not found"}, 404)
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
     def do_POST(self):
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length).decode("utf-8")
@@ -179,6 +192,14 @@ class DownloaderHandler(SimpleHTTPRequestHandler):
         try:
             config.COOKIES_FILE.write_text(json.dumps(data, indent=2))
             self.kernel.http.reload_cookies()
+            self._send_json({"success": True})
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_reset_cookies(self):
+        """Clear session cookies and remove cookies file."""
+        try:
+            self.kernel.http.clear_cookies()
             self._send_json({"success": True})
         except Exception as e:
             self._send_json({"error": str(e)}, 500)

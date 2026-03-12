@@ -60,3 +60,9 @@ class HttpClient:
         self.session.cookies.clear()
         if config.COOKIES_FILE.exists():
             self._load_cookies(config.COOKIES_FILE)
+
+    def clear_cookies(self):
+        """Clear session cookies and remove cookies file."""
+        self.session.cookies.clear()
+        if config.COOKIES_FILE.exists():
+            config.COOKIES_FILE.unlink()

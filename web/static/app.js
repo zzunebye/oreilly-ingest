@@ -23,6 +23,7 @@ async function checkAuth() {
         const data = await res.json();
         const el = document.getElementById('auth-status');
         const loginBtn = document.getElementById('login-btn');
+        const resetBtn = document.getElementById('reset-cookies-btn');
         const statusDot = el.querySelector('.status-dot');
         const statusText = el.querySelector('.status-text');
 
@@ -31,11 +32,13 @@ async function checkAuth() {
             statusDot.className = 'status-dot w-2 h-2 rounded-full bg-emerald-500';
             el.className = 'flex items-center gap-2 text-sm text-emerald-600';
             loginBtn.classList.add('hidden');
+            resetBtn.classList.remove('hidden');
         } else {
             if (statusText) statusText.textContent = data.reason || 'Invalid';
             statusDot.className = 'status-dot w-2 h-2 rounded-full bg-amber-500';
             el.className = 'flex items-center gap-2 text-sm text-amber-600';
             loginBtn.classList.remove('hidden');
+            resetBtn.classList.add('hidden');
         }
     } catch (err) {
         console.error('Auth check failed:', err);
@@ -52,6 +55,15 @@ function showCookieModal() {
 function hideCookieModal() {
     document.getElementById('cookie-modal').classList.add('hidden');
     document.body.style.overflow = '';
+}
+
+async function resetCookies() {
+    try {
+        await fetch(`${API}/api/cookies`, { method: 'DELETE' });
+        location.reload();
+    } catch (err) {
+        console.error('Failed to reset cookies:', err);
+    }
 }
 
 async function saveCookies() {
@@ -987,6 +999,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cookie modal
     document.getElementById('login-btn').onclick = showCookieModal;
+    document.getElementById('reset-cookies-btn').onclick = resetCookies;
     document.getElementById('cancel-modal-btn').onclick = hideCookieModal;
     document.getElementById('save-cookies-btn').onclick = saveCookies;
     document.getElementById('cookie-modal').onclick = (e) => {
